@@ -1,0 +1,10 @@
+/**query.wxss**/
+.col{padding:0}
+.work{
+  color: #387ef5; }
+.off{
+  color: #ef473a;
+}
+.list{margin-bottom:33px}
+.btnBar{padding-top:5px;padding-left:10px;}
+.btnBar button[size='mini']{margin-right:10px;float:right}

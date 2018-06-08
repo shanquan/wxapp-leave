@@ -1,0 +1,16 @@
+<template name="monthStatistic">
+<view class="list card">
+  <view class="item list-header">
+    {{month}}月考勤统计
+    <span class="item-note {{totalClass}}">{{totalNum}}</span>
+  </view>
+  <view wx:for="{{list}}" wx:key="{{index}}" class="item {{item.type}}" >
+    <view class="row">
+      <view class="col col-4">{{item.startDate}}</view>
+      <view class="col col-3">{{item.typeDesc}}</view>
+      <view class="col col-2">{{item.hours}}H</view>
+      <view class="col">{{item.notes}}</view>
+    </view>
+  </view>
+</view>
+</template>

@@ -1,0 +1,63 @@
+<view class="content">
+  <form catchsubmit="formSubmit" catchreset="formReset">
+  <view class="list">
+    <view class="item item-input">
+      <span class="input-label">提交：</span>
+      <radio-group class="input-wrap" name="type" bindchange="radioChange">
+        <view class="row">
+          <view class="col"><radio value="off" checked="true"/>事假</view>
+          <view class="col"><radio value="work"/>加班</view>
+        </view>
+      </radio-group>
+    </view>
+    <view class="item item-input">
+      <span class="input-label">开始日期：</span>
+      <picker name="startDate" class="input-wrap" mode="date" value="{{startDate}}" start="{{baseDate}}" end="{{endDate}}" bindchange="bindStartDateChange">
+        <view class="weui-input">{{startDate}}</view>
+      </picker>
+    </view>
+    <view class="item item-input">
+      <span class="input-label">时间/小时：</span>
+      <input name='hours' type="digit" placeholder="时长(H)"/>
+    </view>
+    <view hidden="{{type=='work'}}" class="item item-input">
+      <span class="input-label">事假类型：</span>
+      <picker name="offtype" class="input-wrap" bindchange="bindPickerChange" value="{{offType}}" range="{{array}}">
+        <view class="weui-input">{{array[offType]}}</view>
+      </picker>
+    </view>
+    <view hidden="{{type=='off'}}" class="item item-toggle">
+       加班结算： {{worktobe}}
+       <switch class='toggle' name="switch" checked bindchange="switch1Change"/>
+    </view>
+    <view class="padding" hidden="{{type=='work'&&worktobe=='+调休单'||type=='off'&&offType==1}}">
+      <textarea name="notes" maxlength="100" auto-height placeholder="备注"/>
+    </view>
+    
+    <view class="card" hidden="{{type=='work'||offType!=1}}">
+      <view class='item list-header'>
+        <view class="row">
+          <view class="col col-4">加班日期</view>
+          <view class="col col-3">类型</view>
+          <view class="col col-2">时长</view>
+          <view class="col">可用</view>
+          <view class="col">使用</view>
+        </view>
+      </view>
+      <view wx:for="{{workList}}" wx:key="{{index}}" class="item" >
+        <view class="row">
+          <view class="col col-4">{{item.startDate}}</view>
+          <view class="col col-3">{{item.typeDesc}}</view>
+          <view class="col col-2">{{item.hours}}H</view>
+          <view class="col {{item.notes==0?'':'positive'}}">{{item.notes}}</view>
+          <view class="col"><input hidden='{{item.notes==0}}' data-key='{{index}}' data-maxval='{{item.notes}}' type='digit' bindconfirm='bindUseInput' bindblur='bindUseInput'/></view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="padding">
+    <button type="primary" formType="submit">提交</button>
+    <!-- <button formType="reset" style="margin-top:20rpx">取消</button> -->
+  </view>
+  </form>
+</view>
