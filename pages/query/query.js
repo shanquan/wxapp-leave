@@ -15,7 +15,7 @@ Page({
   },
   onLoad: function () {
     var self = this;
-    if (app.userIduserId === '') {
+    if (app.userId === '') {
       wx.showModal({
         title: '数据存储是否在线存储？',
         content: '如选否则仅在本地存储且无法跨终端同步，如果选是则需要用户同意授权允许微信登录。',

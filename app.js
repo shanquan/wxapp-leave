@@ -168,7 +168,7 @@ App({
       typeof cb == "function" && cb(self.userId)
     } 
   },
-  userId: wx.getStorageSync('userId') || 'localUser',
+  userId: wx.getStorageSync('userId') || '',
   config: wx.getStorageSync('config') || null,
   records: wx.getStorageSync('records') || [],
   monthTotal:0,
