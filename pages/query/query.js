@@ -52,7 +52,13 @@ Page({
   getUserData:function(){
     var self = this;
     app.getUserData(function (res) {
-      if (res.data.error == 'not_found'){
+      if (res =="localUser"){
+        if (!app.config) {
+          wx.redirectTo({
+            url: '../common/config'
+          })
+        }
+      }else if (res.data.error == 'not_found'){
         wx.redirectTo({
           url: '../common/config'
         })

@@ -5,6 +5,18 @@ const leavesURL = require('./config').leavesURL;
 const leavesAuth = "Y2F1dGVydml0eWFyY2xvbmVyYXRlbmNlOjA1MzQ2NmJjN2QxNDFhZTc1MGZjMTA3YzFiYTQwODQyNjYyZTc2NmU=";
 const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 var debugTime;
+//示例在线失败错误处理
+function errorHandle(cb) {
+  wx.hideLoading();
+  wx.showModal({
+    content: '服务器连接错误，将转为本地离线存储数据!',
+    showCancel: false,
+    confirmText: "确定"
+  })
+  this.userId = 'localUser';
+  wx.setStorageSync('userId', this.userId);
+  typeof cb == "function" && cb(this.userId)
+} 
 App({
   onLaunch: function () {
   },
@@ -25,6 +37,10 @@ App({
         wx.hideLoading()
         self._rev = res.data._rev;
         callback(res);
+      },
+      fail: function (res) {
+        //无法获取用户数据
+        errorHandle.bind(self, callback)();
       }
     })
   },
@@ -51,6 +67,10 @@ App({
         wx.hideLoading()
         self._rev = res.data.rev;
         callback(res);
+      },
+      fail: function (res) {
+        //无法获取用户数据
+        errorHandle.bind(self, callback)();
       }
     })
   },
@@ -103,7 +123,7 @@ App({
                             typeof cb == "function" && cb(self.userId)
                           } else {
                             //创建user失败...
-                            errorHandle();
+                            errorHandle.bind(self,cb)();
                           }
                         }
                       })
@@ -133,7 +153,7 @@ App({
                             typeof cb == "function" && cb(self.userId)
                           } else {
                             //创建user失败...
-                            errorHandle();
+                            errorHandle.bind(self, cb)();
                           }
                         }
                         })
@@ -141,32 +161,21 @@ App({
                   },
                   fail: function (res) {
                     //无法获取openid
-                    errorHandle();
+                    errorHandle.bind(self, cb)();
                   }
                 })
               }else{
                 //无法获取openid
-                errorHandle();
+                errorHandle.bind(self, cb)();
               }
             }
           })
         },
         fail:function(res){
           //登录失败
-          errorHandle();
+          errorHandle.bind(self, cb)();
         }
       }) 
-    //示例在线失败错误处理
-    function errorHandle(){
-      wx.showModal({
-        content: '服务器连接错误，将转为本地离线存储数据!',
-        showCancel: false,
-        confirmText: "确定"
-      })
-      self.userId = 'localUser';
-      wx.setStorageSync('userId', self.userId);
-      typeof cb == "function" && cb(self.userId)
-    } 
   },
   userId: wx.getStorageSync('userId') || '',
   config: wx.getStorageSync('config') || null,
