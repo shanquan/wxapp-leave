@@ -1,5 +1,6 @@
 {
 	"description": "项目配置文件。",
+	"miniprogramRoot": "client/",
 	"setting": {
 		"urlCheck": true,
 		"es6": true,
@@ -8,10 +9,11 @@
 		"newFeature": true
 	},
 	"compileType": "miniprogram",
-	"libVersion": "1.9.94",
+	"libVersion": "2.3.0",
 	"appid": "wx07b4d8129adb2de5",
 	"projectname": "leave",
 	"isGameTourist": false,
+	"cloudfunctionRoot": "cloud-functions/",
 	"condition": {
 		"search": {
 			"current": -1,
