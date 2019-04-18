@@ -11,13 +11,38 @@ Page({
       totalClass: 'positive',
       totalNum: '0H',
       list: []
-    }
+    },
+    isqy: app.isqy
   },
   onLoad: function () {
     if (app.userId === '') {
-      app.userId = 'localUser';
-      wx.setStorageSync('userId', app.userId);
+      app.getUserId(()=>{
+        this.getConfig()
+      })
+    } else{
+      this.getConfig();
     }
+  },
+  getConfig(){
+    if(app.config){
+      this.getUserData();
+      return;
+    }
+    app.getConfig((data)=>{
+      if (data) {
+        app.config = data;
+        this.getUserData()
+      }else{
+        wx.redirectTo({
+          url: '../common/config'
+        })
+      }
+    })
+  },
+  getUserData:function(){
+    app.getRecords(()=>{
+      this.initialData();
+    })
   },
   bindbtnConfig:function(e){
     wx.navigateTo({
@@ -182,5 +207,21 @@ Page({
       path: '/pages/query/query'
     }
     return shareData
+  },
+  choosePerson:function(){
+    wx.qy.checkSession({
+      success:function(){
+        wx.qy.selectEnterpriseContact({
+          fromDepartmentId: -1,
+          mode: "single",
+          type: ["user"],
+          success: function (res) {
+            console.log(res.result);
+            var selectedUserList = res.result.userList;
+            console.log(selectedUserList);
+          }
+        })
+      }
+    });
   }
 })

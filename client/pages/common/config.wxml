@@ -1,0 +1,33 @@
+<view class="bar bar-header bar-stable">
+  <text class="title">初始数据设置</text>
+</view>
+<view class="scroll-content has-header">
+  <form catchsubmit="formSubmit" catchreset="formReset">
+    <view class="list">
+      <view class="item item-input">
+        <span class="input-label">工作起算日期：</span>
+        <picker name="initialDate" class="input-wrap" mode="date" value="{{workFirstDate}}" start="1900-01-01" end="{{today}}" bindchange="bindwfDateChange">
+          <view class="weui-input">{{workFirstDate}}</view>
+        </picker>
+      </view>
+      <view class="item item-input">
+        <span class="input-label">初始日期：</span>
+        <picker name="baseDate" class="input-wrap" mode="date" start="{{workFirstDate}}" value="{{date}}" end="{{today}}" bindchange="bindDateChange">
+          <view class="weui-input">{{date}}</view>
+        </picker>
+      </view>
+      <view class="item item-input">
+        <span class="input-label">初始年休/天：</span>
+        <input value='{{baseLeave}}' name='baseLeave' type="digit" placeholder="初始日期享有的年休天数"/>
+      </view>
+      <!-- <view class="item item-input">
+        <span class="input-label">初始调休单/天：</span>
+        <input value='{{baseOff}}' name='baseOff' type="digit" placeholder="初始日期享有的调休单天数"/>
+      </view> -->
+    </view>
+    <view class="padding">
+      <button type="primary" formType="submit">确定</button>
+      <button formType="reset" style="margin-top:10px">取消</button>
+    </view>
+  </form>
+</view>
