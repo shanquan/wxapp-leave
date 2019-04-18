@@ -110,7 +110,6 @@ Page({
     })
   },
   onConfirm:function(e){
-    var self= this;
     if (editItemValue > editItemMaxVal){
       wx.showModal({
         content: '可用值不能超过加班小时数!',
@@ -124,38 +123,20 @@ Page({
         confirmText: "确定"
       })
     }else{
-      app.records[editItemKey].notes = editItemValue ? editItemValue:0;
-      if (app.userId == 'localUser') {
-        try {
-          wx.setStorageSync('records', app.records);
-          self.setData({
-            showModal: false,
-            list: app.records
-          })
-        } catch (e) {
-          wx.showModal({
-            content: '删除失败,请刷新重试!',
-            showCancel: false,
-            confirmText: "确定"
-          })
-        }
-      } else if (app.userId) {
-        app.putUserData(function (res) {
-          if (res.data.ok) {
-            self.setData({
-              showModal: false,
-              list: app.records
-            })
-          } else {
-            wx.showModal({
-              content: '删除失败:' + res.data.reason,
-              showCancel: false,
-              confirmText: "确定"
-            })
-
-          }
+      app.updateRecord(app.records[editItemKey]._id,{
+        notes: editItemValue ? editItemValue : 0
+      },()=>{
+        wx.showToast({
+          title: '成功',
+          icon: 'success',
+          duration: 2000
         })
-      }
+        app.records[editItemKey].notes = editItemValue ? editItemValue : 0;
+        this.setData({
+          showModal: false,
+          list: app.records
+        })
+      })
     }
   },
   deleteItem:function(e){
@@ -166,67 +147,59 @@ Page({
       cancelText: "取消",
       success: function (res) {
         if (res.confirm) {
-          app.records.splice(e.target.dataset.key, 1);
-          //删除调休时，恢复可用调休单
-          if (e.target.dataset.item.typeDesc == app.OFFTYPES[1]) {
-            var txList = e.target.dataset.item.notes.split(';');
-            txList.forEach(function(item){
-              item = item.split(':');
-              for (var i = 0; i < app.records.length;i++){
-                if (app.records[i].typeDesc == app.WORKTYPES[0] && app.records[i].startDate==item[0]){
-                  app.records[i].notes = Number(app.records[i].notes)+Number(item[1]);
-                  break;
-                }
-              }
+          app.deleteRecord(app.records[e.target.dataset.key]._id,()=>{
+            wx.showToast({
+              title: '成功',
+              icon: 'success',
+              duration: 2000
             })
-          }
-          
-          //删除本月加班抵时，自动恢复调休单可用值
-          var today = app.formatDate(new Date());
-          var mIndex = today.lastIndexOf('-');
-          var month = today.substring(0, mIndex);
-          if (e.target.dataset.item.typeDesc == app.OFFTYPES[0] && JSON.stringify(e.target.dataset.item.startDate).toLowerCase().indexOf(month.toLowerCase()) != -1 && (e.target.dataset.item.hours+ app.monthTotal)>0) {
-            var hoursPlus = app.monthTotal >= 0 ? e.target.dataset.item.hours : e.target.dataset.item.hours + app.monthTotal;
-            for (var i = 0; i < app.records.length;i++){
-              if (JSON.stringify(app.records[i].startDate).toLowerCase().indexOf(month.toLowerCase()) != -1 && app.records[i].typeDesc == app.WORKTYPES[0] && hoursPlus>0){
-                if (Number(app.records[i].notes) + hoursPlus <= app.records[i].hours){
-                  app.records[i].notes = Number(app.records[i].notes) + hoursPlus;
-                  break;
-                }else{
-                  hoursPlus = hoursPlus + Number(app.records[i].notes) - app.records[i].hours;
-                  app.records[i].notes = app.records[i].hours;
-                  continue;
+            app.records.splice(e.target.dataset.key, 1);
+            //删除调休时，恢复可用调休单 todo on server
+            if (e.target.dataset.item.typeDesc == app.OFFTYPES[1]) {
+              var txList = e.target.dataset.item.notes.split(';');
+              txList.forEach(function (item) {
+                item = item.split(':');
+                for (var i = 0; i < app.records.length; i++) {
+                  if (app.records[i].typeDesc == app.WORKTYPES[0] && app.records[i].startDate == item[0]) {
+                    app.updateRecord(app.records[i]._id,{
+                      notes: Number(app.records[i].notes) + Number(item[1])
+                    })
+                    app.records[i].notes = Number(app.records[i].notes) + Number(item[1]);
+                    break;
+                  }
                 }
-              } else if (JSON.stringify(app.records[i].startDate).toLowerCase().indexOf(month.toLowerCase()) == -1 || hoursPlus<=0){
-                break;
+              })
+            }
+
+            //删除本月加班抵时，自动恢复调休单可用值 todo on server
+            var today = app.formatDate(new Date());
+            var mIndex = today.lastIndexOf('-');
+            var month = today.substring(0, mIndex);
+            if (e.target.dataset.item.typeDesc == app.OFFTYPES[0] && JSON.stringify(e.target.dataset.item.startDate).toLowerCase().indexOf(month.toLowerCase()) != -1 && (e.target.dataset.item.hours + app.monthTotal) > 0) {
+              var hoursPlus = app.monthTotal >= 0 ? e.target.dataset.item.hours : e.target.dataset.item.hours + app.monthTotal;
+              for (var i = 0; i < app.records.length; i++) {
+                if (JSON.stringify(app.records[i].startDate).toLowerCase().indexOf(month.toLowerCase()) != -1 && app.records[i].typeDesc == app.WORKTYPES[0] && hoursPlus > 0) {
+                  if (Number(app.records[i].notes) + hoursPlus <= app.records[i].hours) {
+                    app.updateRecord(app.records[i]._id, {
+                      notes: Number(app.records[i].notes) + hoursPlus
+                    })
+                    app.records[i].notes = Number(app.records[i].notes) + hoursPlus;
+                    break;
+                  } else {
+                    hoursPlus = hoursPlus + Number(app.records[i].notes) - app.records[i].hours;
+                    app.updateRecord(app.records[i]._id, {
+                      notes: app.records[i].hours
+                    })
+                    app.records[i].notes = app.records[i].hours;
+                    continue;
+                  }
+                } else if (JSON.stringify(app.records[i].startDate).toLowerCase().indexOf(month.toLowerCase()) == -1 || hoursPlus <= 0) {
+                  break;
+                }
               }
             }
-          }
-            if (app.userId == 'localUser') {
-              try {
-              wx.setStorageSync('records', app.records);
-              updateView();
-            } catch (e) {
-              wx.showModal({
-                content: '删除失败,请刷新重试!',
-                showCancel: false,
-                confirmText: "确定"
-              })
-            }
-            } else if (app.userId) {
-              app.putUserData(function (res) {
-                if (res.data.ok) {
-                  updateView();
-                } else {
-                  wx.showModal({
-                    content: '删除失败:' + res.data.reason,
-                    showCancel: false,
-                    confirmText: "确定"
-                  })
-
-                }
-              })
-            }
+            updateView();
+          })
         }
       }
     })

@@ -115,6 +115,9 @@ Page({
       return true;
     }
   },
+  /**
+   * 更新加班调休单记录
+   */
   updateWorkList:function(){
     var list = [];
     app.records.forEach((item, index) => {
@@ -170,8 +173,12 @@ Page({
         this.data.workList.forEach(function (item) {
           if (Number(item.usehours)) {
             var leftHours = Number(app.records[item.index].notes);
-            app.records[item.index].notes = leftHours - Number(item.usehours);
-            notes += ';'+item.startDate + ':' + Number(item.usehours);
+            app.updateRecord(app.records[item.index]._id,{
+              notes: leftHours - Number(item.usehours)
+            },()=>{
+              app.records[item.index].notes = leftHours - Number(item.usehours);
+            })
+            notes += ';' + item.startDate + ':' + Number(item.usehours);
           }
         })
         notes = notes.substring(1);
@@ -207,13 +214,19 @@ Page({
         for (var i = app.records.length-1; i>=0; i--) {
           if (JSON.stringify(app.records[i].startDate).toLowerCase().indexOf(month.toLowerCase()) != -1 && app.records[i].typeDesc == app.WORKTYPES[0] && Number(app.records[i].notes) > 0 && leftHours) {
           if (Number(app.records[i].notes) - leftHours>=0){
+            app.updateRecord(app.records[i]._id,{
+              notes: Number(app.records[i].notes) - leftHours
+            })
             app.records[i].notes = Number(app.records[i].notes) - leftHours;
             leftHours = 0;
             break;
           } else {
             leftHours = leftHours - Number(app.records[i].notes);
+            app.updateRecord(app.records[i]._id, {
+              notes: 0
+            })
             app.records[i].notes = 0;
-            continue; 
+            continue;
           }
         }
       }
@@ -225,47 +238,22 @@ Page({
         hours: Number(e.detail.value.hours),
         notes: notes
       }
-      app.records.push(record);
-      app.records = app.records.sort((a, b) => { return new Date(b.startDate) - new Date(a.startDate) });
-      if (app.userId == 'localUser'){
-        wx.setStorage({
-          key: 'records',
-          data: app.records,
-          success: function (res) {
-            //按时间倒序排序
-            wx.showToast({
-              title: '提交成功！'
-            })
-            if (self.data.type == 'off' && self.data.offType == '1') {
-              self.updateWorkList();
-            }
-          },
-          fail: function (res) {
-            wx.showModal({
-              content: '提交失败:' + res + '，请重试！',
-              showCancel: false,
-              confirmText: "确定"
-            })
+      app.addRecord(record,()=>{
+        this.setData({
+          offType: 0,
+          type: 'off'
+        })
+        wx.showToast({
+          title: '成功',
+          icon: 'success',
+          duration: 2000
+        })
+        app.getRecords(()=>{
+          if (this.data.type == 'off' && this.data.offType == '1') {
+            this.updateWorkList();
           }
         })
-      } else if (app.userId) {
-        app.putUserData(function (res) {
-          if (res.data.ok) {
-            wx.showToast({
-              title: '提交成功！'
-            })
-            if (self.data.type == 'off' && self.data.offType == '1') {
-              self.updateWorkList();
-            }
-          } else {
-            wx.showModal({
-              content: '提交失败:' + res.data.reason,
-              showCancel: false,
-              confirmText: "确定"
-            })
-          }
-        })
-      }
+      })
     }
   }
 })

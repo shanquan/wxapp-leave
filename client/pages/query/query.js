@@ -15,59 +15,33 @@ Page({
     isqy: app.isqy
   },
   onLoad: function () {
-    var self = this;
     if (app.userId === '') {
-      wx.showModal({
-        title: '数据存储是否在线存储？',
-        content: '如选否则仅在本地存储且无法跨终端同步，如果选是则需要用户同意授权允许微信登录。',
-        confirmText: "是",
-        cancelText: "否",
-        success: function (res) {
-          if (res.confirm) {
-            app.getUserId(function (userId) {
-              if (userId =='localUser'){
-                if (!app.config) {
-                  wx.redirectTo({
-                    url: '../common/config'
-                  })
-                }
-              }else{
-                self.getUserData();
-              }
-            })
-          } else if (res.cancel) {
-            app.userId ='localUser';
-            wx.setStorageSync('userId', app.userId);
-            if (!app.config){
-              wx.redirectTo({
-                url: '../common/config'
-              })
-            }
-          }
-        }
+      app.getUserId(()=>{
+        this.getConfig()
       })
-    } else if (app.userId != 'localUser'){
-      self.getUserData();
+    } else{
+      this.getConfig();
     }
   },
-  getUserData:function(){
-    var self = this;
-    app.getUserData(function (res) {
-      if (res =="localUser"){
-        if (!app.config) {
-          wx.redirectTo({
-            url: '../common/config'
-          })
-        }
-      }else if (res.data.error == 'not_found'){
+  getConfig(){
+    if(app.config){
+      this.getUserData();
+      return;
+    }
+    app.getConfig((data)=>{
+      if (data) {
+        app.config = data;
+        this.getUserData()
+      }else{
         wx.redirectTo({
           url: '../common/config'
         })
-      } else if (res.data._id){
-        app.config = res.data.config;
-        app.records = res.data.records||[];
-        self.initialData();
       }
+    })
+  },
+  getUserData:function(){
+    app.getRecords(()=>{
+      this.initialData();
     })
   },
   bindbtnConfig:function(e){

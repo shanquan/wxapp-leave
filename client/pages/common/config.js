@@ -45,38 +45,11 @@ Page({
     }else{
       app.config.baseLeave = Number(app.config.baseLeave);
     }
-    if (app.userId == 'localUser'){
-      wx.setStorage({
-        key: 'config',
-        data: app.config,
-        success: function (res) {
-          wx.switchTab({
-            url: '../query/query'
-          })
-        },
-        fail: function (e) {
-          wx.showModal({
-            content: '设置失败，请重试！',
-            showCancel: false,
-            confirmText: "确定"
-          })
-        }
+    app.setConfig(app.config,()=>{
+      wx.switchTab({
+        url: '../query/query'
       })
-    } else if (app.userId){
-      app.putUserData(function(res){
-        if (res.data.ok) {
-          wx.switchTab({
-            url: '../query/query'
-          })
-        } else {
-          wx.showModal({
-            content: '设置失败:' + res.error,
-            showCancel: false,
-            confirmText: "确定"
-          })
-        }
-      })
-    }
+    })
   },
   formReset: function (e) {
     this.setData({
