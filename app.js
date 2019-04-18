@@ -1,4 +1,6 @@
 const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+const LEAVEURL = '';
+const LEAVEAUTH = '';
 var debugTime;
 App({
   onLaunch: function () {
