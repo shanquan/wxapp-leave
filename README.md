@@ -1,7 +1,7 @@
 # wxapp-leave
 个人休假管理小程序
 
-## remark old backend
+## remark old backend of local branch
 aws openapi:
 https://4h81pu6x1c.execute-api.us-west-2.amazonaws.com/wxlogin
 
