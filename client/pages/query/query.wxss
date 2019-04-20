@@ -5,6 +5,7 @@
 .off{
   color: #ef473a;
 }
-.list{margin-bottom:33px}
 .btnBar{padding-top:5px;padding-left:10px;}
 .btnBar button[size='mini']{margin-right:10px;float:right}
+.btnBar open-data[type='userAvatarUrl']{width: 24px;height: 24px;border-radius: 50%;display:inline-block}
+.btnBar open-data[type='userNickName']{margin-left:10px;position:relative;top:-4px;}

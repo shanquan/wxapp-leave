@@ -24,6 +24,8 @@
       </span>
     </view>
     <view class="btnBar">
+      <open-data type="userAvatarUrl"></open-data>
+      <open-data type="userNickName" lang="zh_CN"></open-data>
       <button type="default" bindtap="bindbtnConfig" size="mini">设置</button>
       <button type="default" wx:if="{{isqy}}" bindtap="choosePerson" size="mini">企业选人</button>
     </view>

@@ -21,7 +21,20 @@ App({
   WORKTYPES: ['+调休单', '计资'],
   isqy: false,
   onLaunch: function () {
-    this.getUserId();
+    try{
+      var res = wx.getSystemInfoSync()
+      if (res.environment == "wxwork") {
+        this.isqy = true;
+      }
+      if (wx.cloud) {
+        wx.cloud.init();
+        db = wx.cloud.database();
+      }else{
+        errorHandle('wx.cloud不支持，请先升级微信!')
+      }
+    }catch(e){
+      console.log(e)
+    }
   },
   /**
    * 查询openid
@@ -31,26 +44,42 @@ App({
     let self = this;
     try {
       if (wx.cloud) {
-        wx.cloud.init();
-        db = wx.cloud.database();
-        wx.cloud.callFunction({
-          name: 'log',
-          data: {
-            "url": "login",
-          },
-          success: function (res) {
-            if (res.result.openId) {
-              self.userId = res.result.openId;
-              if(cb && typeof cb == 'function')
-              cb()
-            } else {
-              errorHandle('无法获取用户openid!')
+        if (this.isqy){
+          wx.qy.login({
+            success(res) {
+              if (res.code) {
+                wx.cloud.callFunction({
+                  name: 'login',
+                  data: {
+                    "code": res.code,
+                  },
+                  success(result) {
+                    self.userId = result.result.openId;
+                    if (cb && typeof cb == 'function')
+                      cb()
+                    console.log(result)
+                  },
+                  fail: console.error
+                })
+              }
             }
-          },
-          fail: console.error
-        })
-      } else {
-        errorHandle('wx.cloud不支持，请先升级微信!')
+          })
+        }else{
+          wx.cloud.callFunction({
+            name: 'login',
+            data: {},
+            success: function (res) {
+              if (res.result.openId) {
+                self.userId = res.result.openId;
+                if (cb && typeof cb == 'function')
+                  cb()
+              } else {
+                errorHandle('无法获取用户openid!')
+              }
+            },
+            fail: console.error
+          })
+        }
       }
     } catch (e) {
       // Do something when catch error

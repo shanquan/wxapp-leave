@@ -1,0 +1,7 @@
+{
+  "triggers": [{
+    "name": "getAccessToken",
+    "type": "timer",
+    "config": "* * */2 * * * *"
+  }]
+}
